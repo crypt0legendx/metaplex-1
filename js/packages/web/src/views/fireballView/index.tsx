@@ -1174,17 +1174,13 @@ export const FireballView = (
               key={idx}
               style={{
                 padding: "20px",
-                minWidth: columnWidth,
+                // minWidth: columnWidth,
               }}
             >
               <ImageListItem>
                 <CachedImageContent
                   uri={r.image}
                   className={"fullAspectRatio"}
-                  style={{
-                    height: imageWidth,
-                    width: imageWidth,
-                  }}
                 />
                 <ImageListItemBar
                   title={r.name}

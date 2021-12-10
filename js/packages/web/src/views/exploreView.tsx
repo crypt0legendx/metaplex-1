@@ -77,9 +77,9 @@ export const ExploreView = (
 
   const { width } = useWindowDimensions();
   const sizedColumns = (width : number) => {
-           if (width > columnWidth * 3 + columnsGap * 2) {
+           if (width > columnWidth * 3 + columnsGap * 2 + outerPadding) {
       return 3;
-    } else if (width > columnWidth * 2 + columnsGap * 1) {
+    } else if (width > columnWidth * 2 + columnsGap * 1 + outerPadding) {
       return 2;
     } else {
       return 1;
@@ -91,7 +91,6 @@ export const ExploreView = (
       spacing={1}
       style={{
         ...(width >= maxWidth + outerPadding ? { width: maxWidth } : {}),
-        // width: Math.min(maxWidth, width),
         marginLeft: 'auto',
         marginRight: 'auto',
       }}
@@ -111,8 +110,6 @@ export const ExploreView = (
               className={"fullAspectRatio"}
               style={{
                 ...style,
-                height: imageWidth,
-                width: imageWidth,
               }}
             />
           );
@@ -132,19 +129,13 @@ export const ExploreView = (
                       style={{
                         color: 'inherit',
                         display: 'block',
-                        height: imageWidth,
                       }}
                     >
                       {yieldImage({})}
                     </Link>
                   )
                   : (
-                    <div
-                      style={{
-                        display: 'block',
-                        height: imageWidth,
-                      }}
-                    >
+                    <div>
                       {yieldImage({ filter: 'grayscale(100%)' })}
                     </div>
                   )
