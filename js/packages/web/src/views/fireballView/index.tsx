@@ -157,8 +157,12 @@ type MintAndImage = {
   image: string,
 };
 
-type RelevantMint = MintAndImage & {
-  ingredient : string,
+type RelevantMint = MintAndImage & { ingredient : string };
+
+type OnChainIngredient = RelevantMint;
+
+type WalletIngredient = RelevantMint & {
+  tokenAccount : PublicKey,
   parent ?: {
     edition : PublicKey,
     masterMint : PublicKey,
@@ -371,7 +375,11 @@ const getRelevantTokenAccounts = async (
   }
 
   const relevant = decoded
-    .map((a, idx) => ({ ...a, editionParentKey: editionParentKeys[idx] }))
+    .map((a, idx) => ({
+      ...a,
+      tokenAccount: owned.value[idx].pubkey,
+      editionParentKey: editionParentKeys[idx],
+    }))
     .filter(a => {
     const editionParentKey = a.editionParentKey;
     const mintMatches =
@@ -388,10 +396,12 @@ const getRelevantTokenAccounts = async (
     // TODO: better
     const mint = r.mint.toBase58();
     const editionParentKey = relevant[idx].editionParentKey;
+    console.log('TA for ', mint, relevant[idx].tokenAccount.toBase58());
     if (mint in mints) {
       return {
         ...r,
-        ingredient: mints[mint].ingredient
+        ingredient: mints[mint].ingredient,
+        tokenAccount: relevant[idx].tokenAccount,
       };
     } else {
       const parent = mintEditions[editionParentKey];
@@ -401,6 +411,7 @@ const getRelevantTokenAccounts = async (
       return {
         ...r,
         ingredient: parent.ingredient,  // lookup by parent edition
+        tokenAccount: relevant[idx].tokenAccount,
         parent: {
           edition: await getEdition(new PublicKey(mint)),
           masterMint: parent.key,
@@ -496,9 +507,9 @@ export const FireballView = (
   const ingredients = props.ingredients;
 
   const [recipeYields, setRecipeYields] = React.useState<Array<RecipeYield>>([]);
-  const [relevantMints, setRelevantMints] = React.useState<Array<RelevantMint>>([]);
+  const [relevantMints, setRelevantMints] = React.useState<Array<WalletIngredient>>([]);
   const [ingredientList, setIngredientList] = React.useState<Array<any>>([]);
-  const [dishIngredients, setIngredients] = React.useState<Array<RelevantMint>>([]);
+  const [dishIngredients, setIngredients] = React.useState<Array<OnChainIngredient>>([]);
   const [changeList, setChangeList] = React.useState<Array<any>>([]);
   const [matchingIndices, setMatchingIndices] = React.useState<{ [key: string]: number }>({});
 
@@ -729,8 +740,6 @@ export const FireballView = (
       const ingredientNum = new BN(idx);
       const [storeKey, storeBump] = storeKeysAndBumps[idx];
       const storeAccount = storeAccounts[idx];
-      const walletATA = await getAssociatedTokenAccount(
-        anchorWallet.publicKey, change.mint);
       if (change.operation === IngredientView.add) {
         if (storeAccount === null) {
           // nothing
@@ -799,7 +808,7 @@ export const FireballView = (
               ingredientMint,
               ingredientStore: storeKey,
               payer: anchorWallet.publicKey,
-              from: walletATA,
+              from: relevantMint.tokenAccount,
               systemProgram: SystemProgram.programId,
               tokenProgram: TOKEN_PROGRAM_ID,
               rent: SYSVAR_RENT_PUBKEY,
@@ -812,6 +821,20 @@ export const FireballView = (
       } else if (change.operation === IngredientView.recover) {
         if (storeAccount === null) {
           throw new Error(`Ingredient ${group.ingredient} is not in this dish`);
+        }
+
+        const walletATA = await getAssociatedTokenAccount(
+          anchorWallet.publicKey, change.mint);
+
+        if (!await connection.getAccountInfo(walletATA)) {
+          setup.push(Token.createAssociatedTokenAccountInstruction(
+            SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
+            TOKEN_PROGRAM_ID,
+            change.mint,
+            walletATA,
+            anchorWallet.publicKey,
+            anchorWallet.publicKey
+          ));
         }
 
         setup.push(await program.instruction.removeIngredient(
