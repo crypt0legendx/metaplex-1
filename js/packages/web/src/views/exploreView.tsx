@@ -23,9 +23,16 @@ import {
 } from '@oyster/common';
 
 import {
+  useLoading,
+} from '../components/Loader';
+import {
   CachedImageContent,
 } from '../components/ArtContent';
-import { Recipe } from './fireballView';
+import {
+  Recipe,
+  getEditionsRemaining,
+  remainingText,
+} from './fireballView';
 import useWindowDimensions from '../utils/layout';
 import {
   envFor,
@@ -49,6 +56,26 @@ export const ExploreView = (
     () => new RPCConnection(endpoint.url, 'recent'),
     [endpoint]
   );
+
+  const { loading, setLoading } = useLoading();
+
+  const [editionsRemaining, setEditionsRemaining] = React.useState([]);
+
+  React.useEffect(() => {
+    if (!connection) return;
+    setLoading(true);
+    const wrap = async () => {
+      try {
+        setEditionsRemaining(await getEditionsRemaining( // TODO: dedup work?
+          connection, props.recipeYields.filter(c => c.mint).map(c => c.mint)));
+        setLoading(false);
+      } catch (err) {
+        console.error(err);
+        setLoading(false);
+      }
+    };
+    wrap();
+  }, [props]); // TODO: constrain?
 
   const explorerLinkForAddress = (key : PublicKey, shorten: boolean = true) => {
     return (
@@ -116,6 +143,7 @@ export const ExploreView = (
               }}
             />
           );
+          const remaining = r.mint ? editionsRemaining[r.mint.toBase58()] : null;
           return (
             <div
               key={idx}
@@ -160,6 +188,22 @@ export const ExploreView = (
                   )}
                   position="below"
                 />
+                <div>
+                {remaining && (
+                  <p
+                    style={{
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      marginTop: "-10px",
+                      marginBottom: "10px",
+                      color: "gray",
+                      lineHeight: "normal",
+                    }}
+                  >
+                    {remainingText({remaining}) /*expects a dict*/}
+                  </p>
+                )}
+                </div>
                 <span>
                 <Button
                   variant="outlined"

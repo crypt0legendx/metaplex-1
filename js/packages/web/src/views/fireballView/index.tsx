@@ -212,31 +212,14 @@ const fetchMintsAndImages = async (
   });
 };
 
-const getRecipeYields = async (
+export const getEditionsRemaining = async (
   connection : RPCConnection,
-  recipeKey : PublicKey,
+  masterMints: Array<PublicKey>,
 ) => {
-  const [recipeMintOwner, ] = await PublicKey.findProgramAddress(
-    [
-      FIREBALL_PREFIX,
-      recipeKey.toBuffer(),
-    ],
-    FIREBALL_PROGRAM_ID
-  );
-
-  const yieldsAccounts = await connection.getTokenAccountsByOwner(
-      recipeMintOwner,
-      { programId: TOKEN_PROGRAM_ID },
-    );
-  const yieldsDecoded = yieldsAccounts.value.map(v => AccountLayout.decode(v.account.data));
-  const masterMints = yieldsDecoded
-    .filter(r => new BN(r.amount, 'le').toNumber() > 0)
-    .map(r => new PublicKey(r.mint));
-
   const masterEditions = await Promise.all(masterMints.map(m => getEdition(m)));
 
   const editionAccounts = await (connection as any).getMultipleAccountsInfo(masterEditions);
-  const remaining = editionAccounts
+  return editionAccounts
     .map((account, idx) => {
       if (account === null) {
         const missingMint = masterMints[idx].toBase58();
@@ -266,6 +249,37 @@ const getRecipeYields = async (
       }
     },
     {});
+}
+
+export const remainingText = (rem) => {
+  if (rem.remaining[0] === 0) {
+    return 'SOLD OUT';
+  }
+  return `${rem.remaining[0]}/${rem.remaining[1]} remaining`;
+};
+
+const getRecipeYields = async (
+  connection : RPCConnection,
+  recipeKey : PublicKey,
+) => {
+  const [recipeMintOwner, ] = await PublicKey.findProgramAddress(
+    [
+      FIREBALL_PREFIX,
+      recipeKey.toBuffer(),
+    ],
+    FIREBALL_PROGRAM_ID
+  );
+
+  const yieldsAccounts = await connection.getTokenAccountsByOwner(
+      recipeMintOwner,
+      { programId: TOKEN_PROGRAM_ID },
+    );
+  const yieldsDecoded = yieldsAccounts.value.map(v => AccountLayout.decode(v.account.data));
+  const masterMints = yieldsDecoded
+    .filter(r => new BN(r.amount, 'le').toNumber() > 0)
+    .map(r => new PublicKey(r.mint));
+
+  const remaining = await getEditionsRemaining(connection, masterMints);
 
   return (await fetchMintsAndImages(
       connection,
@@ -1232,12 +1246,6 @@ export const FireballView = (
     );
   };
 
-  const remainingText = (rem) => {
-    if (rem.remaining[0] === 0) {
-      return 'SOLD OUT';
-    }
-    return `${rem.remaining[0]}/${rem.remaining[1]} remaining`;
-  };
 
   const singleYieldC = () => {
     if (recipes.length !== 1) {
