@@ -539,6 +539,22 @@ export const FireballView = (
   const { loading, setLoading } = useLoading();
 
   React.useEffect(() => {
+    if (!connection) return;
+    setLoading(true);
+    const wrap = async () => {
+      try {
+        const recipeYieldsPromise = getRecipeYields(connection, recipeKey);
+
+        setRecipeYields(await recipeYieldsPromise);
+      } catch (err) {
+        console.log('Fetch recipe yields err', err);
+      }
+      setLoading(false);
+    };
+    wrap();
+  }, [!connection, recipeKey.toBase58()]);
+
+  React.useEffect(() => {
     if (!anchorWallet) {
       setIngredients([])
       setRelevantMints([]);
@@ -550,17 +566,16 @@ export const FireballView = (
     try {
       const wrap = async () => {
         try {
-          const recipeYieldsPromise = getRecipeYields(connection, recipeKey);
           const relevantMintsPromise = fetchRelevantMints(
               anchorWallet, program, connection, recipeKey);
 
-          const [recipeYields, relevantMintsRes] =
-              await Promise.all([recipeYieldsPromise, relevantMintsPromise])
+          const relevantMintsRes = await relevantMintsPromise;
 
-          if (!recipeYields || !relevantMintsRes) {
+          if (!relevantMintsRes) {
             notify({
               message: `Failed fetching wallet mints`,
             });
+            setLoading(false);
             return;
           }
 
@@ -572,15 +587,12 @@ export const FireballView = (
               description: `Expected ${numIngredients} got ${ingredientList.length}`,
             });
           }
-          setRecipeYields(recipeYields);
           setIngredientList(ingredientList);
           setIngredients(onChainIngredients)
           setRelevantMints(relevantMints);
           setMatchingIndices({});
         } catch (err) {
           console.log('Fetch relevant mints err', err);
-          setLoading(false);
-          return;
         }
         setLoading(false);
       };
