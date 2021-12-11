@@ -48,6 +48,10 @@ export function Routes() {
       ;
   };
 
+  const pathForYield = (y) => {
+    return '/' + y.name.replace(' ', '');
+  };
+
   const cityYields = [
     {
       image: "https://4udejsogpoo3ekjmiigzgcgzyebntokt6oqavvw5vsv77xpvp5eq.arweave.net/5QZEycZ7nbIpLEINkwjZwQLZuVPzoArW3ayr_931f0k/?ext=gif",
@@ -89,6 +93,17 @@ export function Routes() {
                 />
               )
             } />
+            {cityYields.map((y, idx) => (
+              <Route key={idx} path={pathForYield(y)} component={
+                () => (
+                  <FireballView
+                    recipeKey={new PublicKey("HHNbiYDEAJ2PXv5GZXXrn2Ypi1s8CfZK4asgnpg6MSUi")}
+                    recipeYields={[y]}
+                    ingredients={ingredients}
+                  />
+                )
+              } />
+            ))}
             <Route path="/mightyknightyduck" component={
               () => (
                 <FireballView
@@ -106,7 +121,7 @@ export function Routes() {
               () => (
                 <ExploreView
                   recipeYields={[
-                    ...cityYields.map(c => ({ ...c, link: "/collectoooooor" })),
+                    ...cityYields.map(c => ({ ...c, link: pathForYield(c) })),
                     ...mightyKnightyDuckYields.map(c => ({ ...c, link: "/mightyknightyduck" })),
                     ...[
                       {

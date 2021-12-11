@@ -1245,6 +1245,7 @@ export const FireballView = (
     }
     const recipe = recipes[0];
     const recipeYieldAvailable = recipeYields.find(y => y.mint.equals(recipe.mint));
+    const actualColumnWidth = (Math.min(width, maxWidth) - outerPadding - columnsGap * (cols - 1)) / cols;
     return (
       <React.Fragment>
         <p className={"text-title"}>{recipe.name}</p>
@@ -1254,13 +1255,25 @@ export const FireballView = (
           </div>
         </p>
         <Stack
-          direction="row"
+          direction={cols > 1 ? "row" : "column"}
+          spacing={2}
         >
           <CachedImageContent
             uri={recipe.image}
             className={"fullAspectRatio"}
+            style={{
+              ...(cols > 1 ? { maxWidth: actualColumnWidth } : {}),
+              minWidth: actualColumnWidth,
+              padding: "20px",
+            }}
           />
-          <Stack spacing={1}>
+          <Stack
+            spacing={1}
+            style={{
+              ...(cols > 3 ? { paddingRight: '200px' } : {}),
+              padding: "20px",
+            }}
+          >
             <div>
               <p
                 className={"text-subtitle"}
@@ -1329,17 +1342,20 @@ export const FireballView = (
                   )}
                   position="below"
                 />
-                {recipeYieldAvailable && <Chip
-                  label={remainingText(recipeYieldAvailable)}
-                  size="small"
-                  style={{
-                    marginBottom: "10px",
-                    background: "#4E2946",
-                    color: "white",
-                    lineHeight: "normal",
-                  }}
-                />}
-                {craftButtonC(r, topDisabled || !recipeYieldAvailable, { width: '100%' })}
+                {recipeYieldAvailable && (
+                  <p
+                    style={{
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      marginBottom: "10px",
+                      color: "gray",
+                      lineHeight: "normal",
+                    }}
+                  >
+                    {remainingText(recipeYieldAvailable)}
+                  </p>
+                )}
+                {craftButtonC(r, topDisabled || !recipeYieldAvailable)}
               </ImageListItem>
             </div>
           );
