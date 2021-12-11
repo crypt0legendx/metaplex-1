@@ -49,7 +49,7 @@ export function Routes() {
   };
 
   const pathForYield = (y) => {
-    return '/' + y.name.replace(' ', '');
+    return '/' + y.name.replaceAll(' ', '');
   };
 
   const cityYields = [

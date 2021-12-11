@@ -204,7 +204,7 @@ const fetchMintsAndImages = async (
 
   return schemaJsons.map((schema, idx) => {
     return {
-      mint: mintKeys[idx],
+      mint: new PublicKey(metadatasDecoded[idx].mint),
       name: schema.name,
       image: schema.image,
       description: schema.description,
