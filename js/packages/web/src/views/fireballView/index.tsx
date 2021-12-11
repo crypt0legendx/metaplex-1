@@ -1379,6 +1379,9 @@ export const FireballView = (
       spacing={1}
     >
       {recipes.length > 1 ? multipleYieldC() : singleYieldC()}
+
+      <Box style={{ height: '20px' }} />
+
       <div className={"row"}>
         <p className={"text-title"}>Your NFTs</p>
         <div className={"unlock-nft"}>
