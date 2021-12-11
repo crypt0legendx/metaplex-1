@@ -327,6 +327,10 @@ programCommand('reclaim_master_edition')
 
 programCommand('burn_crank')
   .option(
+    '--recipe <pubkey>',
+    `Recipe to burn (if not specified opens a program-account-subscribe)`,
+  )
+  .option(
     '--dish <pubkey>',
     `Dish to burn (if not specified opens a program-account-subscribe)`,
   )
@@ -370,14 +374,16 @@ programCommand('burn_crank')
           );
         }
       ));
-      const storeAccounts : any = [];
+      const storeAccounts = await connection.getMultipleAccountsInfo(
+          storeKeysAndBumps.map(s => s[0]));
 
       // TODO: separate on overflow
       const instrs : Array<[TransactionInstruction, PublicKey]> = [];
       for (let idx = 0; idx < recipe.roots.length; ++idx) {
         const [storeKey, storeBump] = storeKeysAndBumps[idx];
         const storeAccount = storeAccounts[idx];
-        if (storeAccount === null) {
+        console.log('store account', idx, storeAccount);
+        if (!storeAccount) {
           continue;
         }
 
@@ -439,7 +445,43 @@ programCommand('burn_crank')
         wrap();
       }
 
-    if (options.dish) {
+    if (options.recipe) {
+      const recipeKey = new PublicKey(options.recipe);
+      const dishAccounts = await connection.getProgramAccounts(
+        FIREBALL_PROGRAM_ID,
+        {
+          filters: [
+            {
+              memcmp: {
+                offset:
+                  8 + // discriminator
+                  32  // authority
+                  ,
+                bytes: recipeKey.toBase58(),
+              },
+            },
+          ],
+        },
+      );
+      const wrap = async () => {
+        for (const dishAccount of dishAccounts) {
+          try {
+            await burnCrank(
+              {
+                accountId: new PublicKey(dishAccount.pubkey),
+                accountInfo: dishAccount.account,
+              },
+              {
+                slot: 0, // only logged
+              }
+            );
+          } catch (err) {
+            log.error(`Burn crank failed for ${dishAccount.pubkey}: ${err}`);
+          }
+        };
+      };
+      wrap();
+    } else if (options.dish) {
       const dishKey = new PublicKey(options.dish);
       burnCrankWrapper(
         {
@@ -450,13 +492,11 @@ programCommand('burn_crank')
           slot: 0, // only logged
         }
       );
-      return;
+    } else {
+      const subId = connection.onProgramAccountChange(
+        FIREBALL_PROGRAM_ID,
+        burnCrankWrapper);
     }
-
-    const subId = connection.onProgramAccountChange(
-      FIREBALL_PROGRAM_ID,
-      burnCrankWrapper);
-
   })
 
 function programCommand(name: string) {
