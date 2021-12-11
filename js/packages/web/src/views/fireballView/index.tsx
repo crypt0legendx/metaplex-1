@@ -3,10 +3,9 @@ import { RouteComponentProps, } from "react-router-dom";
 import queryString from 'query-string';
 
 import ContentLoader from 'react-content-loader';
-import { Image } from 'antd';
+import { Button, Image } from 'antd';
 import {
   Box,
-  Button,
   Card,
   Chip,
   Link as HyperLink,
@@ -1228,7 +1227,6 @@ export const FireballView = (
       >
         <span>
         <Button
-          variant="outlined"
           style={{
             ...buttonStyle,
             borderRadius: "30px",
@@ -1239,7 +1237,7 @@ export const FireballView = (
           disabled={disabled}
           onClick={onCraft(recipe)}
         >
-          CRAFT
+          Craft
         </Button>
         </span>
       </Tooltip>
@@ -1302,7 +1300,7 @@ export const FireballView = (
               <p
                 style={{
                   fontSize: '14px',
-                  fontWeight: '500',
+                  fontWeight: 500,
                   marginBottom: "10px",
                   color: "gray",
                   lineHeight: "normal",
@@ -1355,7 +1353,7 @@ export const FireballView = (
                   <p
                     style={{
                       fontSize: '14px',
-                      fontWeight: '500',
+                      fontWeight: 500,
                       marginBottom: "10px",
                       color: "gray",
                       lineHeight: "normal",
@@ -1399,8 +1397,6 @@ export const FireballView = (
       >
         <span>
         <Button
-          size="small"
-          variant="outlined"
           style={{
             width: "100%",
             borderRadius: "30px",

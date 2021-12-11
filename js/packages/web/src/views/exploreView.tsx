@@ -67,7 +67,7 @@ export const ExploreView = (
     const wrap = async () => {
       try {
         setEditionsRemaining(await getEditionsRemaining( // TODO: dedup work?
-          connection, props.recipeYields.filter(c => c.mint).map(c => c.mint)));
+          connection, props.recipeYields.map(c => c.mint).filter((c) : c is PublicKey => !!c)));
         setLoading(false);
       } catch (err) {
         console.error(err);
@@ -193,7 +193,7 @@ export const ExploreView = (
                   <p
                     style={{
                       fontSize: '14px',
-                      fontWeight: '500',
+                      fontWeight: 500,
                       marginTop: "-10px",
                       marginBottom: "10px",
                       color: "gray",
@@ -206,7 +206,6 @@ export const ExploreView = (
                 </div>
                 <span>
                 <Button
-                  variant="outlined"
                   style={{
                     borderRadius: "30px",
                     height: "35px",
