@@ -1254,6 +1254,7 @@ export const FireballView = (
             You can burn {numIngredients} NFTs to redeem this limited edition.
           </div>
         </p>
+        <Box style={{ height: '10px' }} />
         <Stack
           direction={cols > 1 ? "row" : "column"}
           spacing={0}
@@ -1320,6 +1321,7 @@ export const FireballView = (
           editions.
         </div>
       </p>
+      <Box style={{ height: '10px' }} />
       <ImageList cols={cols} gap={columnsGap}>
         {recipes.map((r, idx) => {
           const recipeYieldAvailable = recipeYields.find(y => y.mint.equals(r.mint));

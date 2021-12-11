@@ -1,9 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
+import { Button } from 'antd';
 import {
   Box,
-  Button,
   Chip,
   Link as HyperLink,
   ImageList,
@@ -103,12 +103,13 @@ export const ExploreView = (
       <p className={"text-subtitle"}>
         Recipes let you mix and match your current NFTs to craft new, rarer items.
       </p>
+      <Box style={{ height: '20px' }} />
       <ImageList cols={cols} gap={columnsGap}>
         {props.recipeYields.map((r, idx) => {
           const yieldImage = (style) => (
             <CachedImageContent
               uri={r.image}
-              preview={false}
+              preview={!!r.link}
               className={"fullAspectRatio"}
               style={{
                 ...style,
@@ -125,15 +126,7 @@ export const ExploreView = (
               <ImageListItem>
                 {r.link
                   ? (
-                    <Link
-                      to={r.link}
-                      style={{
-                        color: 'inherit',
-                        display: 'block',
-                      }}
-                    >
-                      {yieldImage({})}
-                    </Link>
+                    yieldImage({})
                   )
                   : (
                     <div>
@@ -167,6 +160,25 @@ export const ExploreView = (
                   )}
                   position="below"
                 />
+                <span>
+                <Button
+                  variant="outlined"
+                  style={{
+                    borderRadius: "30px",
+                    height: "35px",
+                  }}
+                >
+                  {r.link && <Link
+                    to={r.link}
+                    style={{
+                      color: 'inherit',
+                      display: 'block',
+                    }}
+                  >
+                    View Recipe
+                  </Link>}
+                </Button>
+                </span>
               </ImageListItem>
             </div>
           );
