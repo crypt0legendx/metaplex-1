@@ -70,11 +70,11 @@ export const ExploreView = (
   // TODO: more robust
   const maxWidth = 960;
   const outerPadding = 96 * 2;
-  const columnsGap = 4;
+  const columnsGap = 40;
   const maxColumns = 3;
   const columnWidth = (maxWidth - columnsGap * (maxColumns - 1)) / maxColumns;
 
-  const tilePadding = 20;
+  const tilePadding = 0;
   const imageWidth = columnWidth - tilePadding * 2;
 
   const { width } = useWindowDimensions();
@@ -103,7 +103,7 @@ export const ExploreView = (
       <p className={"text-subtitle"}>
         Recipes let you mix and match your current NFTs to craft new, rarer items.
       </p>
-      <ImageList cols={cols} variant="masonry">
+      <ImageList cols={cols} gap={columnsGap}>
         {props.recipeYields.map((r, idx) => {
           const yieldImage = (style) => (
             <CachedImageContent
@@ -119,7 +119,6 @@ export const ExploreView = (
             <div
               key={idx}
               style={{
-                padding: "20px",
                 minWidth: columnWidth,
               }}
             >

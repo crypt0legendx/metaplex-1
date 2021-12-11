@@ -1126,11 +1126,11 @@ export const FireballView = (
   // TODO: more robust
   const maxWidth = 1440;
   const outerPadding = 96 * 2;
-  const columnsGap = 4;
+  const columnsGap = 40;
   const maxColumns = 4;
   const columnWidth = (maxWidth - outerPadding - columnsGap * (maxColumns - 1)) / maxColumns;
 
-  const tilePadding = 20;
+  const tilePadding = 0;
   const imageWidth = columnWidth - tilePadding * 2;
 
   const { width } = useWindowDimensions();
@@ -1256,7 +1256,7 @@ export const FireballView = (
         </p>
         <Stack
           direction={cols > 1 ? "row" : "column"}
-          spacing={2}
+          spacing={0}
         >
           <CachedImageContent
             uri={recipe.image}
@@ -1264,14 +1264,17 @@ export const FireballView = (
             style={{
               ...(cols > 1 ? { maxWidth: actualColumnWidth } : {}),
               minWidth: actualColumnWidth,
-              padding: "20px",
             }}
           />
           <Stack
             spacing={1}
             style={{
               ...(cols > 3 ? { paddingRight: '200px' } : {}),
-              padding: "20px",
+              ...(
+                cols > 1
+                ? { paddingLeft: `${columnsGap}px` }
+                : { paddingTop: '20px', paddingBottom: '20px', }
+              ),
             }}
           >
             <div>
@@ -1317,16 +1320,12 @@ export const FireballView = (
           editions.
         </div>
       </p>
-      <ImageList cols={cols}>
+      <ImageList cols={cols} gap={columnsGap}>
         {recipes.map((r, idx) => {
           const recipeYieldAvailable = recipeYields.find(y => y.mint.equals(r.mint));
           return (
             <div
               key={idx}
-              style={{
-                padding: "20px",
-                // minWidth: columnWidth,
-              }}
             >
               <ImageListItem>
                 <CachedImageContent
@@ -1420,7 +1419,13 @@ export const FireballView = (
         </span>
       </Tooltip>
 
-      <ImageList cols={cols}>
+      <ImageList
+        cols={cols}
+        gap={columnsGap}
+        style={{
+          paddingTop: '20px',
+        }}
+      >
         {Object.keys(ingredients).map((ingredient, idx) => {
           const dishIngredient = dishIngredients.find(c => c.ingredient === ingredient);
           const matchingIngredients = relevantMints.filter(c => c.ingredient === ingredient);
@@ -1447,7 +1452,6 @@ export const FireballView = (
             <div
               key={idx}
               style={{
-                padding: "20px",
                 minWidth: columnWidth,
               }}
             >
