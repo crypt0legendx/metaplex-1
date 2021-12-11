@@ -32,11 +32,19 @@ export const AppLayout = React.memo((props: any) => {
               padding: '30px 48px ',
             }}
           >
-          <Header
-            className="App-Bar"
+            <Header className="App-Bar" >
+              <AppBar />
+            </Header>
+          </Content>
+          <Content
+            style={{
+              overflow: 'scroll',
+              paddingLeft: '96px',
+              paddingRight: '96px',
+              paddingBottom: '30px',
+              paddingTop: '-30px',
+            }}
           >
-            <AppBar />
-          </Header>
             {props.children}
           </Content>
         </Layout>

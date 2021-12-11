@@ -58,7 +58,9 @@ export const ExploreView = (
         rel="noreferrer"
         title={key.toBase58()}
         underline="none"
-        sx={{ fontFamily: 'Monospace' }}
+        sx={{
+          fontFamily: 'Monospace',
+        }}
       >
         {shorten ? shortenAddress(key.toBase58()) : key.toBase58()}
       </HyperLink>
@@ -67,7 +69,7 @@ export const ExploreView = (
 
   // TODO: more robust
   const maxWidth = 960;
-  const outerPadding = 48 * 2;
+  const outerPadding = 96 * 2;
   const columnsGap = 4;
   const maxColumns = 3;
   const columnWidth = (maxWidth - columnsGap * (maxColumns - 1)) / maxColumns;
@@ -143,8 +145,25 @@ export const ExploreView = (
                 <ImageListItemBar
                   title={r.name}
                   subtitle={(
-                    <div>
-                      {r.mint ? explorerLinkForAddress(r.mint) : <p>{"\u00A0"}</p>}
+                    <div
+                      style={{
+                        paddingBottom: '10px',
+                      }}
+                    >
+                      {r.mint
+                        ? explorerLinkForAddress(r.mint)
+                        : (
+                          <p
+                            style={{
+                              fontSize: '12px',
+                              fontFamily: 'Monospace',
+                              color: '#b480eb',
+                            }}
+                          >
+                            Coming Soon
+                          </p>
+                        )
+                      }
                     </div>
                   )}
                   position="below"

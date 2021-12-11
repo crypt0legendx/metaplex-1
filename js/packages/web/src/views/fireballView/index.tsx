@@ -155,6 +155,7 @@ type MintAndImage = {
   mint: PublicKey,
   name: string,
   image: string,
+  description: string,
 };
 
 type RelevantMint = MintAndImage & { ingredient : string };
@@ -206,6 +207,7 @@ const fetchMintsAndImages = async (
       mint: mintKeys[idx],
       name: schema.name,
       image: schema.image,
+      description: schema.description,
     };
   });
 };
@@ -1123,7 +1125,7 @@ export const FireballView = (
 
   // TODO: more robust
   const maxWidth = 1440;
-  const outerPadding = 48 * 2;
+  const outerPadding = 96 * 2;
   const columnsGap = 4;
   const maxColumns = 4;
   const columnWidth = (maxWidth - outerPadding - columnsGap * (maxColumns - 1)) / maxColumns;
@@ -1152,19 +1154,155 @@ export const FireballView = (
     backgroundColor: "#888",
   };
 
-  // TODO: lift wording
-  return (
-    <Stack
-      spacing={1}
-      // style={{
-      //   width: columnWidth * cols + columnsGap * (cols - 1),
-      // }}
-    >
+  const onCraft = (recipe) => {
+    return e => {
+      setLoading(true);
+      const wrap = async () => {
+        try {
+          const newIngredients = Object.keys(ingredients).reduce(
+            (acc, ingredient) => {
+              if (dishIngredients.find(c => c.ingredient === ingredient)) {
+                return acc;
+              }
+              const matchingIngredients = relevantMints.filter(
+                  c => c.ingredient === ingredient);
+              if (matchingIngredients.length === 0) {
+                throw new Error(`You don't have ingredient ${ingredient}`);
+              }
+              let index = matchingIndices[ingredient] || 0;
+              if (index >= matchingIngredients.length) {
+                console.warn(`Bad index ${index} of ${matchingIngredients.length} for ${ingredient}`);
+                index = 0;
+              }
+              const m = matchingIngredients[index];
+              return {
+                ...acc,
+                [ingredient]: {
+                  ingredient,
+                  mint: m.mint,
+                  operation: IngredientView.add,
+                },
+              };
+            },
+            {}
+          );
+          setChangeList(Object.values(newIngredients));
+          await mintRecipe(e, recipe.mint, Object.values(newIngredients));
+          setLoading(false);
+        } catch (err) {
+          notify({
+            message: `Mint failed`,
+            description: err.message,
+          });
+          setChangeList([]);
+          setLoading(false);
+        }
+      };
+      wrap();
+    }
+  };
+
+  const craftButtonC = (recipe, disabled, buttonStyle = {}) => {
+    return (
+      <Tooltip
+        title={(
+          <div>
+            Craft with the first {numIngredients} ingredients found in your
+            wallet. Pick and choose specific ingredients below!
+          </div>
+        )}
+      >
+        <span>
+        <Button
+          variant="outlined"
+          style={{
+            ...buttonStyle,
+            borderRadius: "30px",
+            height: "45px",
+            color: disabled ? "gray" : "white",
+            borderColor: disabled ? "gray" : "white",
+          }}
+          disabled={disabled}
+          onClick={onCraft(recipe)}
+        >
+          CRAFT
+        </Button>
+        </span>
+      </Tooltip>
+    );
+  };
+
+  const remainingText = (rem) => {
+    if (rem.remaining[0] === 0) {
+      return 'SOLD OUT';
+    }
+    return `${rem.remaining[0]}/${rem.remaining[1]} remaining`;
+  };
+
+  const singleYieldC = () => {
+    if (recipes.length !== 1) {
+      throw new Error(`internal error: expected exactly 1 yield for this view`);
+    }
+    const recipe = recipes[0];
+    const recipeYieldAvailable = recipeYields.find(y => y.mint.equals(recipe.mint));
+    return (
+      <React.Fragment>
+        <p className={"text-title"}>{recipe.name}</p>
+        <p className={"text-subtitle"}>
+          <div>
+            You can burn {numIngredients} NFTs to redeem this limited edition.
+          </div>
+        </p>
+        <Stack
+          direction="row"
+        >
+          <CachedImageContent
+            uri={recipe.image}
+            className={"fullAspectRatio"}
+          />
+          <Stack spacing={1}>
+            <div>
+              <p
+                className={"text-subtitle"}
+                style={{ fontSize: '15px' }}
+              >
+                {recipeYieldAvailable?.description}
+              </p>
+            </div>
+            <div>
+              {explorerLinkForAddress(recipe.mint)}
+            </div>
+            <div>
+            {recipeYieldAvailable && (
+              <p
+                style={{
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  marginBottom: "10px",
+                  color: "gray",
+                  lineHeight: "normal",
+                }}
+              >
+                {remainingText(recipeYieldAvailable)}
+              </p>
+            )}
+            </div>
+            <div>
+            {craftButtonC(recipe, topDisabled || !recipeYieldAvailable)}
+            </div>
+          </Stack>
+        </Stack>
+      </React.Fragment>
+    );
+  };
+
+  const multipleYieldC = () => (
+    <React.Fragment>
       <p className={"text-subtitle"}>
-        You can burn {numIngredients} NFTs to redeem {recipes.length > 1 ?
-        'one of these' : 'this'} limited edition{recipes.length > 1 ? 's' :
-        ''}. Click 'CRAFT' to burn the first {numIngredients} ingredients found
-        in your wallet or pick and choose below!
+        <div>
+          You can burn {numIngredients} NFTs to redeem one of these limited
+          editions.
+        </div>
       </p>
       <ImageList cols={cols}>
         {recipes.map((r, idx) => {
@@ -1192,7 +1330,7 @@ export const FireballView = (
                   position="below"
                 />
                 {recipeYieldAvailable && <Chip
-                  label={`${recipeYieldAvailable.remaining[0]}/${recipeYieldAvailable.remaining[1]} remaining`}
+                  label={remainingText(recipeYieldAvailable)}
                   size="small"
                   style={{
                     marginBottom: "10px",
@@ -1201,69 +1339,21 @@ export const FireballView = (
                     lineHeight: "normal",
                   }}
                 />}
-                <Button
-                  variant="outlined"
-                  style={{
-                    borderRadius: "30px",
-                    height: "45px",
-                    color: (topDisabled || !recipeYieldAvailable) ? "gray" : "white",
-                    borderColor: (topDisabled || !recipeYieldAvailable) ? "gray" : "white",
-                  }}
-                  disabled={topDisabled || !recipeYieldAvailable}
-                  onClick={e => {
-                    setLoading(true);
-                    const wrap = async () => {
-                      try {
-                        const newIngredients = Object.keys(ingredients).reduce(
-                          (acc, ingredient) => {
-                            if (dishIngredients.find(c => c.ingredient === ingredient)) {
-                              return acc;
-                            }
-                            const matchingIngredients = relevantMints.filter(
-                                c => c.ingredient === ingredient);
-                            if (matchingIngredients.length === 0) {
-                              throw new Error(`You don't have ingredient ${ingredient}`);
-                            }
-                            let index = matchingIndices[ingredient] || 0;
-                            if (index >= matchingIngredients.length) {
-                              console.warn(`Bad index ${index} of ${matchingIngredients.length} for ${ingredient}`);
-                              index = 0;
-                            }
-                            const r = matchingIngredients[index];
-                            return {
-                              ...acc,
-                              [ingredient]: {
-                                ingredient,
-                                mint: r.mint,
-                                operation: IngredientView.add,
-                              },
-                            };
-                          },
-                          {}
-                        );
-                        setChangeList(Object.values(newIngredients));
-                        await mintRecipe(e, r.mint, Object.values(newIngredients));
-                        setLoading(false);
-                      } catch (err) {
-                        notify({
-                          message: `Mint failed`,
-                          description: err.message,
-                        });
-                        setChangeList([]);
-                        setLoading(false);
-                      }
-                    };
-                    wrap();
-                  }}
-                >
-                  CRAFT
-                </Button>
+                {craftButtonC(r, topDisabled || !recipeYieldAvailable, { width: '100%' })}
               </ImageListItem>
             </div>
           );
         })}
       </ImageList>
+    </React.Fragment>
+  );
 
+  // TODO: lift wording
+  return (
+    <Stack
+      spacing={1}
+    >
+      {recipes.length > 1 ? multipleYieldC() : singleYieldC()}
       <div className={"row"}>
         <p className={"text-title"}>Your NFTs</p>
         <div className={"unlock-nft"}>
