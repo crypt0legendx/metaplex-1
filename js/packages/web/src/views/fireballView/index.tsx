@@ -1507,14 +1507,18 @@ export const FireballView = (
                           {explorerLinkForAddress(r.mint)}
                           {"\u00A0"}
                           {dishIngredient && (
+                            <Tooltip
+                              title="Added for Crafting"
+                            >
                             <Chip
-                              label="on chain"
+                              label="Added"
                               size="small"
                               style={{
                                 background: "#4E2946",
                                 color: "white",
                               }}
                             />
+                            </Tooltip>
                           )}
                         </div>
                       )
