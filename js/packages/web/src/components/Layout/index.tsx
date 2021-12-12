@@ -28,8 +28,8 @@ export const AppLayout = React.memo((props: any) => {
         <Layout id={'width-layout'}>
           <Content
             style={{
-              overflow: 'scroll',
               padding: '30px 48px ',
+              flex: 'unset',
             }}
           >
             <Header className="App-Bar" >
