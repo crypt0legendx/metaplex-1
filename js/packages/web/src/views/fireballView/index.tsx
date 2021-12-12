@@ -222,11 +222,8 @@ export const getEditionsRemaining = async (
     .map((account, idx) => {
       if (account === null) {
         const missingMint = masterMints[idx].toBase58();
-        notify({
-          message: 'Fetch mint failed',
-          description: `Could not fetch master edition for mint ${missingMint}`,
-        });
-        return NaN;
+        console.warn(`Could not fetch master edition for mint ${missingMint}`);
+        return null;
       }
 
       const edition = decodeMasterEdition(account.data);
@@ -251,6 +248,12 @@ export const getEditionsRemaining = async (
 }
 
 export const remainingText = (rem) => {
+  if (rem.remaining === null) {
+    return ''; // not found
+  }
+  if (typeof rem.remaining === 'number' && isNaN(rem.remaining)) {
+    return ''; // TODO?
+  }
   if (rem.remaining[0] === 0) {
     return 'SOLD OUT';
   }
@@ -1268,9 +1271,7 @@ export const FireballView = (
       <React.Fragment>
         <p className={"text-title"}>{recipe.name}</p>
         <p className={"text-subtitle"}>
-          <div>
-            You can burn {numIngredients} NFTs to redeem this limited edition.
-          </div>
+          You can burn {numIngredients} NFTs to redeem this limited edition.
         </p>
         <Box style={{ height: '10px' }} />
         <Stack

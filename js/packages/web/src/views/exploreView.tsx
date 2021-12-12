@@ -189,7 +189,7 @@ export const ExploreView = (
                   position="below"
                 />
                 <div>
-                {remaining && (
+                {!!remaining && (
                   <p
                     style={{
                       fontSize: '14px',
