@@ -78,6 +78,14 @@ export function Routes() {
     },
   ];
 
+  const apeCyborgYields = [
+    {
+      image: "https://arweave.net/w2I8pcZ4bRWpDOxxZOFS2CEzgm9GOf9nhVW0ZFNluJU",
+      name: "professor ape cyborg",
+      mint: new PublicKey("J8nLE658PUcLGU6qecatWweutttC9yofxF4UTeYutUXj"),
+    },
+  ];
+
   return (
     <>
       <BrowserRouter basename={'/'}>
@@ -116,6 +124,17 @@ export function Routes() {
                 />
               )
             } />
+            <Route path="/professorapecyborg" component={
+              () => (
+                <FireballView
+                  recipeKey={new PublicKey("GUKyCfChES46JJxFv75hKCdhR3qorTkTa5cppU27v9Cp")}
+                  recipeYields={apeCyborgYields}
+                  ingredients={{
+                    ...ingredientSubset(['traincar', 'telescope ape', 'house']),
+                  }}
+                />
+              )
+            } />
             <Route path="/gumdrop" component={GumdropView} />
             <Route path="/" component={
               () => (
@@ -123,12 +142,7 @@ export function Routes() {
                   recipeYields={[
                     ...cityYields.map(c => ({ ...c, link: pathForYield(c) })),
                     ...mightyKnightyDuckYields.map(c => ({ ...c, link: "/mightyknightyduck" })),
-                    ...[
-                      {
-                        image: "https://pbs.twimg.com/media/FF9EUFEWUAkhJcy?format=jpg&name=large",
-                        name: "professor ape cyborg",
-                      }
-                    ],
+                    ...apeCyborgYields.map(c => ({ ...c, link: "/professorapecyborg" })),
                     ...[
                       {
                         image: "https://pbs.twimg.com/media/FF9EUF0WYAoXcyf?format=jpg&name=large",
