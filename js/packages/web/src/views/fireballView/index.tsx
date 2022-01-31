@@ -262,25 +262,8 @@ export const remainingText = (rem) => {
 
 const getRecipeYields = async (
   connection : RPCConnection,
-  recipeKey : PublicKey,
+  masterMints : Array<PublicKey>,
 ) => {
-  const [recipeMintOwner, ] = await PublicKey.findProgramAddress(
-    [
-      FIREBALL_PREFIX,
-      recipeKey.toBuffer(),
-    ],
-    FIREBALL_PROGRAM_ID
-  );
-
-  const yieldsAccounts = await connection.getTokenAccountsByOwner(
-      recipeMintOwner,
-      { programId: TOKEN_PROGRAM_ID },
-    );
-  const yieldsDecoded = yieldsAccounts.value.map(v => AccountLayout.decode(v.account.data));
-  const masterMints = yieldsDecoded
-    .filter(r => new BN(r.amount, 'le').toNumber() > 0)
-    .map(r => new PublicKey(r.mint));
-
   const remaining = await getEditionsRemaining(connection, masterMints);
 
   return (await fetchMintsAndImages(
@@ -546,7 +529,7 @@ export const FireballView = (
     setLoading(true);
     const wrap = async () => {
       try {
-        const recipeYieldsPromise = getRecipeYields(connection, recipeKey);
+        const recipeYieldsPromise = getRecipeYields(connection, recipes.map(r => r.mint));
 
         setRecipeYields(await recipeYieldsPromise);
       } catch (err) {
@@ -1092,7 +1075,7 @@ export const FireballView = (
       throw new Error(`One of the mint instructions failed. See console logs`);
     }
 
-    setRecipeYields(await getRecipeYields(connection, recipeKey));
+    setRecipeYields(await getRecipeYields(connection, recipes.map(r => r.mint)));
 
     const [ingredients, relevantMints] = await fetchWalletIngredients(
         connection, recipeKey, anchorWallet.publicKey, ingredientList);
