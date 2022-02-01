@@ -175,6 +175,22 @@ export const AppBar = () => {
           <MetaplexMenu />
         </div>
         <div className="app-right" style={{ marginRight: 0 }}>
+          {(
+            <Button
+              className="wallet-key"
+              style={{
+                width: "100%",
+                marginRight: "10px",
+              }}
+            >
+              <a
+                href="https://www.cyber.xyz/thecollectoooooor"
+                target="_blank"
+              >
+                Cyber
+              </a>
+            </Button>
+          )}
           {<BuyButton />}
           {!connected && (
             <ConnectButton style={{ height: 48 }} allowWalletChange />
