@@ -124,6 +124,24 @@ export const ExploreView = (
         marginRight: 'auto',
       }}
     >
+      {width >= 768 && (
+        <>
+        <video
+          autoplay="autoplay" loop muted
+          style={{
+            height: "600px",
+            marginLeft: -outerPadding / 2,
+            width: (width >= maxWidth + outerPadding ? maxWidth + outerPadding : width),
+            overflowX: "hidden",
+            objectFit: "cover",
+          }}
+        >
+          <source src="/cyber_gallery.mp4" type="video/mp4" />
+        </video>
+        <Box />
+        <Box />
+        </>
+      )}
       <p className={"text-title"}>
         Explore Recipes
       </p>
