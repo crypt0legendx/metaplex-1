@@ -5,7 +5,6 @@ import { PublicKey } from '@solana/web3.js';
 
 import { Providers } from './providers';
 import { AppLayout } from './components/Layout';
-import { AdminView } from './views/admin';
 import { FireballView } from "./views/fireballView";
 import { ExploreView } from "./views/exploreView";
 import { GumdropView } from "./views/gumdropView";

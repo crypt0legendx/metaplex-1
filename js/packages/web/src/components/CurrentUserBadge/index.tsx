@@ -17,7 +17,6 @@ import {
   useWalletModal,
   useQuerySearch,
   WRAPPED_SOL_MINT,
-  HashQueryLink,
 } from '@oyster/common';
 import { useSolPrice } from '../../contexts';
 import { useTokenList } from '../../contexts/tokenList';

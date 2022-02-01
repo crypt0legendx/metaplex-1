@@ -5,7 +5,6 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import useWindowDimensions from '../../utils/layout';
 import { MenuOutlined } from '@ant-design/icons';
 import { HowToBuyModal } from '../HowToBuyModal';
-import { HashQueryLink } from '@oyster/common';
 import {
   Cog,
   CurrentUserBadge,

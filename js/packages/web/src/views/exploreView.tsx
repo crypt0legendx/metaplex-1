@@ -127,7 +127,7 @@ export const ExploreView = (
       {width >= 768 && (
         <>
         <video
-          autoplay="autoplay" loop muted
+          autoPlay loop muted
           style={{
             height: "600px",
             marginLeft: -outerPadding / 2,
